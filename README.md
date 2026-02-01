@@ -2,6 +2,8 @@
 
 A Python-based MCP (Model Context Protocol) server that generates creative dad joke prompts. Connect your AI agent to this server and request dad jokes on any topic in various styles!
 
+While this project was entirely vibe slopped, shoutout to [OrenGrinker's Dad Joke MCP Server](https://github.com/OrenGrinker/dad-jokes-mcp-server) for inspiration and possiobly examples for the LLMs.
+
 ## Features
 
 - 🎪 **7 Joke Styles**: pun, wordplay, observational, anti-humor, question-answer, one-liner, knock-knock, and classic
@@ -25,7 +27,7 @@ When you request a dad joke through an MCP client:
 
 1. **Clone or navigate to the project directory**:
    ```bash
-   cd /Users/bdurrett/Desktop/Development/djmcp
+   cd joke-poc-mcp-server
    ```
 
 2. **Create a virtual environment** (recommended):
