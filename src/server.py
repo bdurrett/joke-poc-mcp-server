@@ -11,11 +11,13 @@ from typing import Any
 from mcp.server import Server
 from mcp.server.sse import SseServerTransport
 from mcp.types import (
+    CallToolResult,
     GetPromptResult,
     Prompt,
     PromptArgument,
     PromptMessage,
     TextContent,
+    Tool,
 )
 from pythonjsonlogger import jsonlogger
 from starlette.applications import Starlette
@@ -119,6 +121,80 @@ def log_response(request_id: str, request_type: str, response: Any) -> None:
                 "timestamp": datetime.utcnow().isoformat(),
             }
         )
+
+
+@app.list_tools()
+async def list_tools() -> list[Tool]:
+    """List available tools."""
+    request_id = str(uuid.uuid4())
+    log_request(request_id, "list_tools", {})
+    
+    tools = [
+        Tool(
+            name="joke_styles",
+            description="Get a list of available joke styles that can be used with the dad_joke prompt.",
+            inputSchema={
+                "type": "object",
+                "properties": {},
+            },
+        )
+    ]
+    
+    log_response(request_id, "list_tools", [t.model_dump() for t in tools])
+    logger.info(
+        "Listed available tools",
+        extra={
+            "request_id": request_id,
+            "tool_count": len(tools),
+            "tool_names": [t.name for t in tools],
+        }
+    )
+    
+    return tools
+
+
+@app.call_tool()
+async def call_tool(name: str, arguments: dict[str, Any] | None) -> CallToolResult:
+    """Call a specific tool with arguments."""
+    request_id = str(uuid.uuid4())
+    log_request(
+        request_id,
+        "call_tool",
+        {"name": name, "arguments": arguments}
+    )
+    
+    if name == "joke_styles":
+        styles = list(JOKE_STYLES.keys())
+        result = CallToolResult(
+            content=[
+                TextContent(
+                    type="text",
+                    text=f"Available joke styles: {', '.join(styles)}",
+                )
+            ]
+        )
+    else:
+        error_msg = f"Unknown tool: {name}"
+        logger.error(
+            error_msg,
+            extra={
+                "request_id": request_id,
+                "tool_name": name,
+            }
+        )
+        raise ValueError(error_msg)
+    
+    log_response(request_id, "call_tool", result.model_dump())
+    logger.info(
+        "Executed tool",
+        extra={
+            "request_id": request_id,
+            "tool_name": name,
+            "status": "success",
+        }
+    )
+    
+    return result
 
 
 @app.list_prompts()
@@ -256,7 +332,7 @@ async def run_server():
     # Create Starlette app with SSE transport handlers
     from starlette.routing import Route
     
-    async def handle_sse(request):
+    async def handle_sse(request: Request):
         """Handle SSE GET requests for server-to-client streaming."""
         async with sse.connect_sse(
             request.scope,
@@ -270,13 +346,14 @@ async def run_server():
             )
         return Response()
     
-    async def handle_messages(request):
+    async def handle_messages(request: Request):
         """Handle POST requests for client-to-server messages."""
         await sse.handle_post_message(
             request.scope,
             request.receive,
             request._send,
         )
+        return Response()
     
     starlette_app = Starlette(
         debug=settings.log_level == "DEBUG",
