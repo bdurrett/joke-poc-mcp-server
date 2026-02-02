@@ -140,7 +140,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="build_dad_joke_prompt",
-            description="Build a dad joke prompt for a given topic and optional style.",
+            description="Builds a specialized dad joke prompt for an LLM. Use this when you want to generate a dad joke yourself. You should use the output of this tool as your next system prompt or instruction.",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -207,7 +207,7 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> CallToolResu
             content=[
                 TextContent(
                     type="text",
-                    text=f"Built dad joke prompt: {prompt_text}",
+                    text=prompt_text,
                 )
             ]
         )
