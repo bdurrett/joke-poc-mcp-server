@@ -160,6 +160,16 @@ Available styles:
 - `knock-knock` - Traditional knock-knock joke format
 - `classic` - Traditional dad joke style (default)
 
+## Examples
+
+### Cursor
+`build_dad_joke_prompt( football ) and use the output as a prompt and then append the result of that prompt to the test.txt file. Only append the result, oo not include the call to the tool or the parameters.`
+Calls the tool and uses the output as a prompt
+
+`append /dad-joke/dad_joke to the test.txt file`
+Uses the prompt (the slash will trigger a dialog asking for the topic and style)
+
+
 ## Logging
 
 The server provides extensive logging with full request/response details:
