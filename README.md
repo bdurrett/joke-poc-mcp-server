@@ -6,11 +6,11 @@ While this project was entirely vibe slopped, shoutout to [OrenGrinker's Dad Jok
 
 ## Features
 
-- 🎪 **7 Joke Styles**: pun, wordplay, observational, anti-humor, question-answer, one-liner, knock-knock, and classic
-- 🌐 **Network Support**: Runs over SSE (Server-Sent Events) transport for network accessibility
+- 🎪 **8 Joke Styles**: pun, wordplay, observational, anti-humor, question-answer, one-liner, knock-knock, and classic
+- 🛠️ **MCP Tools**: `joke_styles` and `build_dad_joke_prompt` for automated prompt building
+- 🌐 **Network Support**: Runs over SSE (Server-Sent Events) transport with standardized endpoints (`/sse` and `/messages`)
 - 📝 **Extensive Logging**: Full request/response logging with structured JSON format
 - 🐳 **Docker Ready**: Complete Docker configuration for standalone deployment
-- ⚙️ **Configurable**: Environment-based configuration for all settings
 
 ## How It Works
 
@@ -52,7 +52,9 @@ When you request a dad joke through an MCP client:
    python -m src.server
    ```
 
-The server will start on `http://0.0.0.0:8000/messages` by default.
+The server will start on `http://0.0.0.0:8000` by default.
+- SSE Connection: `http://localhost:8000/sse` (or `/messages` for compatibility)
+- Message Posting: `http://localhost:8000/messages`
 
 ### Docker Installation
 
@@ -109,7 +111,7 @@ Add to your Claude Desktop configuration (`~/Library/Application Support/Claude/
 {
   "mcpServers": {
     "dad-joke": {
-      "url": "http://localhost:8000/messages"
+      "url": "http://localhost:8000/sse"
     }
   }
 }
@@ -123,7 +125,7 @@ Add to your Cline MCP settings:
 {
   "mcpServers": {
     "dad-joke": {
-      "url": "http://localhost:8000/messages",
+      "url": "http://localhost:8000/sse",
       "transport": "sse"
     }
   }
@@ -132,21 +134,21 @@ Add to your Cline MCP settings:
 
 ## Usage
 
-Once connected to an MCP client, you can use the `dad_joke` prompt:
+### Prompts
+Use the `dad_joke` prompt to generate a prompt for an LLM:
+- Required: `topic`
+- Optional: `style` (default: `classic`)
 
-### Basic Usage
+### Tools
+The server provides tools for automated interaction:
 
-```
-Add a dad joke about programming
-```
+1. **`joke_styles`**: Returns a list of all available joke styles.
+   - *Arguments*: None
 
-The server will return a prompt that generates a programming-related dad joke.
-
-### With Style Selection
-
-```
-Add a dad joke about cats in pun style
-```
+2. **`build_dad_joke_prompt`**: Programmatically generates a dad joke prompt.
+   - *Arguments*: 
+     - `topic` (string, required): The subject of the joke.
+     - `style` (string, optional): The style of the joke.
 
 Available styles:
 - `pun` - Clever wordplay and multiple meanings
@@ -190,7 +192,7 @@ Set `LOG_FORMAT=text` for human-readable logs:
 ```
 ┌─────────────────┐
 │   MCP Client    │
-│ (Claude/Cline)  │
+│ (Claude/Cursor) │
 └────────┬────────┘
          │ SSE/HTTP
          ▼
@@ -199,8 +201,9 @@ Set `LOG_FORMAT=text` for human-readable logs:
 │     Server      │
 │                 │
 │  ┌───────────┐  │
-│  │  Prompts  │  │
-│  │  Handler  │  │
+│  │ Prompts / │  │
+│  │   Tools   │  │
+│  │ Handlers  │  │
 │  └───────────┘  │
 │                 │
 │  ┌───────────┐  │
@@ -248,9 +251,9 @@ djmcp/
 
 ### MCP client can't connect
 
-- Ensure server is running: `curl http://localhost:8000/messages`
+- Ensure server is running: `curl http://localhost:8000/sse`
 - Verify firewall settings allow connections on port 8000
-- Check client configuration matches server host/port
+- Check client configuration matches server host/port (ensure using `/sse` for GET)
 
 ### No logs appearing
 

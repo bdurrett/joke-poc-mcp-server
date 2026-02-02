@@ -137,7 +137,25 @@ async def list_tools() -> list[Tool]:
                 "type": "object",
                 "properties": {},
             },
-        )
+        ),
+        Tool(
+            name="build_dad_joke_prompt",
+            description="Build a dad joke prompt for a given topic and optional style.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "topic": {
+                        "type": "string",
+                        "description": "The topic of the joke",
+                    },
+                    "style": {
+                        "type": "string",
+                        "description": "The style of the joke (e.g., pun, classic)",
+                    },
+                },
+                "required": ["topic"],
+            },
+        ),
     ]
     
     log_response(request_id, "list_tools", [t.model_dump() for t in tools])
@@ -170,6 +188,26 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> CallToolResu
                 TextContent(
                     type="text",
                     text=f"Available joke styles: {', '.join(styles)}",
+                )
+            ]
+        )
+    elif name == "build_dad_joke_prompt":
+        if not arguments or "topic" not in arguments:
+            raise ValueError("Missing required argument: topic")
+            
+        topic = arguments["topic"]
+        style = arguments.get("style", "classic").lower()
+        
+        if style not in JOKE_STYLES:
+            style = "classic"
+            
+        prompt_text = JOKE_STYLES[style].format(topic=topic)
+        
+        result = CallToolResult(
+            content=[
+                TextContent(
+                    type="text",
+                    text=f"Built dad joke prompt: {prompt_text}",
                 )
             ]
         )
@@ -358,6 +396,7 @@ async def run_server():
     starlette_app = Starlette(
         debug=settings.log_level == "DEBUG",
         routes=[
+            Route("/sse", endpoint=handle_sse, methods=["GET"]),
             Route("/messages", endpoint=handle_sse, methods=["GET"]),
             Route("/messages", endpoint=handle_messages, methods=["POST"]),
         ],

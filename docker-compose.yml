@@ -18,7 +18,7 @@ services:
       - LOG_RESPONSES=true
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/messages')" ]
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/sse')" ]
       interval: 30s
       timeout: 10s
       retries: 3
