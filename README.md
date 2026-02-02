@@ -2,7 +2,7 @@
 
 A Python-based MCP (Model Context Protocol) server that generates creative dad joke prompts. Connect your AI agent to this server and request dad jokes on any topic in various styles!
 
-While this project was entirely vibe slopped, shoutout to [OrenGrinker's Dad Joke MCP Server](https://github.com/OrenGrinker/dad-jokes-mcp-server) for inspiration and possiobly examples for the LLMs.
+While this project was entirely vibe slopped, shoutout to [OrenGrinker's Dad Joke MCP Server](https://github.com/OrenGrinker/dad-jokes-mcp-server) for inspiration and possibly examples the vibe coding LLM referenced.
 
 ## Features
 
