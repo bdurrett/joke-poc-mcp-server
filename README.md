@@ -238,7 +238,7 @@ pytest
 ### Project Structure
 
 ```
-djmcp/
+joke-poc-mcp-server/
 ├── src/
 │   ├── __init__.py       # Package initialization
 │   ├── config.py         # Configuration management
@@ -248,7 +248,7 @@ djmcp/
 ├── pyproject.toml        # Project metadata
 ├── requirements.txt      # Python dependencies
 ├── .env.example          # Example environment config
-└── README.md            # This file
+└── README.md             # This file
 ```
 
 ## Troubleshooting
@@ -273,15 +273,7 @@ djmcp/
 
 ## License
 
-MIT License - feel free to use and modify as needed!
-
-## Contributing
-
-Contributions welcome! Feel free to:
-- Add new joke styles
-- Improve prompt templates
-- Enhance logging capabilities
-- Add tests and documentation
+Free, as in beer... use this for anything, no attribution required, steal this code, say it's your own, etc.
 
 ---
 
