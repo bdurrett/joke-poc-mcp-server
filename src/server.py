@@ -24,6 +24,7 @@ from starlette.applications import Starlette
 from starlette.routing import Route
 from starlette.responses import Response
 from starlette.requests import Request
+from starlette.types import Scope, Receive, Send
 
 from .config import settings
 
@@ -370,35 +371,46 @@ async def run_server():
     # Create Starlette app with SSE transport handlers
     from starlette.routing import Route
     
-    async def handle_sse(request: Request):
+    async def handle_sse(scope: Scope, receive: Receive, send: Send):
         """Handle SSE GET requests for server-to-client streaming."""
         async with sse.connect_sse(
-            request.scope,
-            request.receive,
-            request._send,
+            scope,
+            receive,
+            send,
         ) as streams:
             await app.run(
                 streams[0],
                 streams[1],
                 app.create_initialization_options(),
             )
-        return Response()
     
-    async def handle_messages(request: Request):
-        """Handle POST requests for client-to-server messages."""
-        await sse.handle_post_message(
-            request.scope,
-            request.receive,
-            request._send,
-        )
-        return Response()
+    async def handle_messages(scope: Scope, receive: Receive, send: Send):
+        """Handle requests for /messages (GET for SSE, POST for messages)."""
+        if scope["method"] == "GET":
+            await handle_sse(scope, receive, send)
+        elif scope["method"] == "POST":
+            await sse.handle_post_message(
+                scope,
+                receive,
+                send,
+            )
+        else:
+            response = Response(status_code=405)
+            await response(scope, receive, send)
     
+    class ASGIHandler:
+        """Wrapper to ensure Starlette treats the function as a raw ASGI app."""
+        def __init__(self, handler):
+            self.handler = handler
+            
+        async def __call__(self, scope: Scope, receive: Receive, send: Send):
+            await self.handler(scope, receive, send)
+
     starlette_app = Starlette(
         debug=settings.log_level == "DEBUG",
         routes=[
-            Route("/sse", endpoint=handle_sse, methods=["GET"]),
-            Route("/messages", endpoint=handle_sse, methods=["GET"]),
-            Route("/messages", endpoint=handle_messages, methods=["POST"]),
+            Route("/sse", endpoint=ASGIHandler(handle_sse)),
+            Route("/messages", endpoint=ASGIHandler(handle_messages)),
         ],
     )
     
